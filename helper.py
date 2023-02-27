@@ -2,9 +2,9 @@ import numpy as np
 import helper as hp
 import numpy.linalg as LA
 import scipy.linalg as SLA
-import pandas as pd
 
 from time import perf_counter
+from time import perf_counter_ns
 
 # ----i/p: interger (degree); o/p: Identity matrix of that degree----#
 def identity(n):
@@ -114,7 +114,7 @@ def LU_partial_pivoting(A):
     
     pivot_index_array = []
 
-    start = perf_counter()
+    start = float(perf_counter_ns())
     for row in range(degree-1):
         pivot_search_array = U[row:,row]
 
@@ -135,7 +135,7 @@ def LU_partial_pivoting(A):
             pivot_ratio = L[row_below, row] = U[row_below,row] / U[row, row]
             U[row_below,row:] = U[row_below,row:] - (pivot_ratio * U[row,row:])
     
-    decomp_time = perf_counter() - start            # total time for decomposition
+    decomp_time = float(perf_counter_ns()) - start            # total time for decomposition
 
     return P, L, U, decomp_time
 
@@ -153,10 +153,10 @@ def my_system_of_equations_solver(A, b):
     P, L, U, decomp_time = decomp
     Pb = hp.cross_product(P, b)
 
-    start = perf_counter()
+    start = float(perf_counter_ns())
     C = hp.forward_substitution(L, Pb)          # solves for C, where, LC = Pb
     x = hp.backward_substitution(U, C)          # solves for x, where, Ux = C
-    solution_time = perf_counter() - start      # time for processing the solution after getting P, L, U
+    solution_time = float(perf_counter_ns()) - start      # time for processing the solution after getting P, L, U
 
     ax_minus_b_norm = LA.norm(hp.cross_product(A, x) - b)                       # Norm of Ax-b
     pa_minus_lu_norm = LA.norm(hp.cross_product(P, A) - hp.cross_product(L, U)) # Norm of PA-LU
@@ -169,26 +169,26 @@ def my_system_of_equations_solver(A, b):
 def scipy_system_of_equations_solver(A, b):
     try:
         # -------------solve using scipy.linalg's lu method-------------
-        start = perf_counter()
+        start = float(perf_counter_ns())
         P, L, U = SLA.lu(A)
         P = LA.inv(P)               # P(permutation matrix) from scipy.lu is inverse of permutaion matrix P of PAx = LUx = Pb
-        decomp_time_lu = perf_counter() - start
+        decomp_time_lu = float(perf_counter_ns()) - start
 
         Pb = P@b    
         
-        start = perf_counter()
+        start = float(perf_counter_ns())
         C = SLA.solve_triangular(L, Pb, lower=True, unit_diagonal=True) # solves for C, where, LC = Pb
         x_lu = SLA.solve_triangular(U, C)                               # solves for x, where, Ux = C
-        solution_time_lu = perf_counter() - start                       # time for processing the solution after getting P, L, U
+        solution_time_lu = float(perf_counter_ns()) - start                      # time for processing the solution after getting P, L, U
 
         # -------------solve using scipy.linalg's lu_factor method-------------
-        start = perf_counter()
+        start = float(perf_counter_ns())
         parameters = (lu, piv) = SLA.lu_factor(A)                       # PLU decomposition using scipy.linalg's lu_factor method
         
-        section_ge = perf_counter()
+        section_ge = float(perf_counter_ns())
         x_lu_factor = SLA.lu_solve(parameters, b)                       # solve for x using scipy.linalg's lu_factor method
 
-        solution_time_lu_factor = perf_counter() - section_ge           # time taken for PLU decomposition
+        solution_time_lu_factor = float(perf_counter_ns()) - section_ge          # time taken for PLU decomposition
         decomp_time_lu_factor = section_ge - start                      # time taken for # solve for x
 
         # calculation of norms
