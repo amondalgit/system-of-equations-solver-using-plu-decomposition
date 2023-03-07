@@ -63,12 +63,12 @@ def swap_row(A, diagonal_row, pivot_row, from_col = 0, to_col = -1):
 def absolute_max_element_index(arr):
     arr = list(map(abs, arr))
     arr_len, max_el_index  = len(arr), 0
-    max_el = abs(arr[max_el_index])
+    max_el = arr[max_el_index]
 
     for index in range(1,arr_len):
         if arr[index] > max_el:
             max_el_index = index
-            max_el = abs(arr[max_el_index]) 
+            max_el = arr[max_el_index]
     return max_el_index
 
 
